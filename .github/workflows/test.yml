@@ -1,0 +1,132 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: shama_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linter
+        run: pnpm run lint
+
+      - name: Run unit tests with coverage
+        run: pnpm run test:unit --coverage
+        env:
+          NODE_ENV: test
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: test_password
+          DB_DATABASE: shama_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test_jwt_secret_for_ci_cd_only_not_for_production
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+      - name: Build production
+        run: pnpm run build:prod
+
+      - name: Run integration tests
+        run: pnpm run test:e2e
+        env:
+          NODE_ENV: test
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: test_password
+          DB_DATABASE: shama_test
+          REDIS_URL: redis://localhost:6379
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run npm audit
+        run: npm audit --audit-level moderate
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  docker:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker images
+        run: |
+          docker compose -f compose.yml build --parallel
+
+      - name: Test Docker compose
+        run: |
+          docker compose -f compose.yml config --quiet
