@@ -10,16 +10,16 @@
 ### 1.1 Comandos Básicos
 ```bash
 # Estado de servicios
-docker-compose ps
+docker compose ps
 
 # Logs en tiempo real
-docker-compose logs -f <service-name>
+docker compose logs -f <service-name>
 
 # Uso de recursos
 docker stats
 
 # Conectividad de red
-docker-compose exec <service> ping <target>
+docker compose exec <service> ping <target>
 
 # Health checks
 curl -f http://localhost:5000/health
@@ -36,15 +36,15 @@ curl -f http://localhost:5000/health
 ## 2. Problemas Comunes de Inicio
 
 ### 2.1 Servicio No Inicia
-**Síntomas:** `docker-compose ps` muestra estado "Exit" o "Restarting"
+**Síntomas:** `docker compose ps` muestra estado "Exit" o "Restarting"
 
 **Diagnóstico:**
 ```bash
 # Ver logs detallados
-docker-compose logs <service-name>
+docker compose logs <service-name>
 
 # Verificar dependencias
-docker-compose ps
+docker compose ps
 ```
 
 **Soluciones:**
@@ -58,19 +58,19 @@ docker-compose ps
 **Diagnóstico:**
 ```bash
 # Verificar Postgres
-docker-compose exec postgres pg_isready -U shama_user -d shama_platform
+docker compose exec postgres pg_isready -U shama_user -d shama_platform
 
 # Ver logs de PgBouncer
-docker-compose logs pgbouncer
+docker compose logs pgbouncer
 ```
 
 **Soluciones:**
 ```bash
 # Reiniciar PgBouncer
-docker-compose restart pgbouncer
+docker compose restart pgbouncer
 
 # Resetear conexiones
-docker-compose exec postgres psql -U shama_user -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle';"
+docker compose exec postgres psql -U shama_user -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state = 'idle';"
 ```
 
 ### 2.3 NATS Connection Issues
@@ -79,15 +79,15 @@ docker-compose exec postgres psql -U shama_user -c "SELECT pg_terminate_backend(
 **Diagnóstico:**
 ```bash
 # Verificar NATS
-docker-compose exec nats nats-server --version
+docker compose exec nats nats-server --version
 
 # Test conexión
-docker-compose exec sales-svc nats pub test "hello"
+docker compose exec sales-svc nats pub test "hello"
 ```
 
 **Soluciones:**
-- Reiniciar NATS: `docker-compose restart nats`
-- Verificar JetStream: `docker-compose exec nats nats stream ls`
+- Reiniciar NATS: `docker compose restart nats`
+- Verificar JetStream: `docker compose exec nats nats stream ls`
 
 ---
 
@@ -102,7 +102,7 @@ docker-compose exec sales-svc nats pub test "hello"
 # Query: histogram_quantile(0.95, rate(http_request_duration_seconds[5m]))
 
 # Database slow queries
-docker-compose exec postgres psql -U shama_user -d shama_platform -c "
+docker compose exec postgres psql -U shama_user -d shama_platform -c "
 SELECT query, mean_time, calls
 FROM pg_stat_statements
 ORDER BY mean_time DESC
@@ -118,7 +118,7 @@ ON sales.quotations(status, created_at DESC)
 WHERE status IN ('PENDING', 'DRAFT');
 ```
 
-- **Cache issues:** Limpiar Redis `docker-compose exec redis redis-cli FLUSHALL`
+- **Cache issues:** Limpiar Redis `docker compose exec redis redis-cli FLUSHALL`
 - **Connection pool:** Ajustar PgBouncer config
 
 ### 3.2 Alto Uso de Memoria
@@ -130,7 +130,7 @@ WHERE status IN ('PENDING', 'DRAFT');
 docker stats
 
 # Ver procesos dentro del contenedor
-docker-compose exec sales-svc ps aux
+docker compose exec sales-svc ps aux
 ```
 
 **Soluciones:**
@@ -155,10 +155,10 @@ services:
 **Diagnóstico:**
 ```bash
 # Profiling con clinic
-docker-compose exec sales-svc npx clinic doctor -- node dist/main.js
+docker compose exec sales-svc npx clinic doctor -- node dist/main.js
 
 # Ver threads
-docker-compose exec sales-svc ps -T
+docker compose exec sales-svc ps -T
 ```
 
 **Soluciones:**
@@ -200,17 +200,17 @@ WHERE status NOT IN ('DRAFT', 'PENDING', 'SOLD', 'CANCELLED');
 **Diagnóstico:**
 ```bash
 # Ver streams de NATS
-docker-compose exec nats nats stream info quotation-events
+docker compose exec nats nats stream info quotation-events
 
 # Ver dead letter queue
-docker-compose logs inventory-svc | grep "dead-letter"
+docker compose logs inventory-svc | grep "dead-letter"
 ```
 
 **Soluciones:**
 - **Reprocesar eventos:**
 ```bash
 # Reset consumer
-docker-compose exec nats nats consumer reset quotation-events inventory-consumer
+docker compose exec nats nats consumer reset quotation-events inventory-consumer
 ```
 
 - **Manual replay:** Publicar eventos faltantes desde DB logs
@@ -221,10 +221,10 @@ docker-compose exec nats nats consumer reset quotation-events inventory-consumer
 **Diagnóstico:**
 ```bash
 # Ver logs de generación
-docker-compose logs sales-svc | grep "pdfmake"
+docker compose logs sales-svc | grep "pdfmake"
 
 # Test manual
-docker-compose exec sales-svc node -e "
+docker compose exec sales-svc node -e "
 const pdfmake = require('pdfmake');
 console.log('PDFMake version:', pdfmake.version);
 "

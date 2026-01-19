@@ -1,0 +1,228 @@
+networks:
+  shama-net:
+    driver: bridge
+
+services:
+  # --- Message Broker ---
+  nats:
+    image: nats:2.9-alpine
+    container_name: shama-nats
+    ports:
+      - "4222:4222"
+    networks:
+      - shama-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # --- Database ---
+  postgres:
+    image: postgres:15-alpine
+    container_name: shama-db
+    environment:
+      POSTGRES_USER: shama_user
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_MULTIPLE_DATABASES: inventory,crm,sales
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./postgres/init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-dbs.sh
+    networks:
+      - shama-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shama_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- PgBouncer ---
+  pgbouncer:
+    image: edoburu/pgbouncer:1.21.0
+    container_name: shama-pgbouncer
+    environment:
+      DATABASE_URL: postgres://shama_user:secure_password@postgres:5432/shama_platform
+      POOL_MODE: session
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 25
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - shama-net
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "6432"]
+      interval: 5s
+
+  # --- Redis (Cache) ---
+  redis:
+    image: redis:7-alpine
+    container_name: shama-redis
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - shama-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+
+  # --- MinIO (Object Storage) ---
+  minio:
+    image: minio/minio:latest
+    container_name: shama-minio
+    command: server /data --console-address ":5005"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_data:/data
+    ports:
+      - "5004:9000"
+      - "5005:5005"
+    networks:
+      - shama-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+
+  # --- Loki (Log Aggregation) ---
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: shama-loki
+    ports:
+      - "5006:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - shama-net
+
+  # --- Promtail (Log Shipper) ---
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: shama-promtail
+    volumes:
+      - /var/log:/var/log
+      - ./monitoring/promtail-config.yaml:/etc/promtail/config.yaml
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - shama-net
+
+  # --- Jaeger (Distributed Tracing) ---
+  jaeger:
+    image: jaegertracing/all-in-one:1.52
+    container_name: shama-jaeger
+    ports:
+      - "5008:16686"  # UI
+      - "14268:14268" # Accept jaeger.thrift over HTTP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - shama-net
+
+  # --- Grafana ---
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: shama-grafana
+    ports:
+      - "5007:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - shama-net
+
+  # --- Microservicios ---
+  inventory-svc:
+    build: ./apps/inventory-svc
+    container_name: shama-inventory
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=development
+      - PORT=5001
+      - DB_HOST=pgbouncer
+      - DB_PORT=6432
+      - DB_PASSWORD=secure_password
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - shama-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:5001/health"]
+      interval: 10s
+
+  crm-svc:
+    build: ./apps/crm-svc
+    container_name: shama-crm
+    ports:
+      - "5002:5002"
+    environment:
+      - NODE_ENV=development
+      - PORT=5002
+      - DB_HOST=pgbouncer
+      - DB_PASSWORD=secure_password
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - shama-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:5002/health"]
+      interval: 10s
+
+  sales-svc:
+    build: ./apps/sales-svc
+    container_name: shama-sales
+    ports:
+      - "5003:5003"
+    environment:
+      - NODE_ENV=development
+      - PORT=5003
+      - DB_HOST=pgbouncer
+      - DB_PASSWORD=secure_password
+      - NATS_URL=nats://nats:4222
+      - INVENTORY_URL=http://inventory-svc:5001
+      - BRAND_COLOR_PRIMARY=#f0c800
+      - BRAND_COLOR_SECONDARY=#2E2725
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+    networks:
+      - shama-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:5003/health"]
+      interval: 10s
+
+  gateway:
+    build: ./apps/gateway
+    container_name: shama-gateway
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - INVENTORY_URL=http://inventory-svc:5001
+      - CRM_URL=http://crm-svc:5002
+      - SALES_URL=http://sales-svc:5003
+      - JWT_SECRET=your_super_secret_jwt_key_here
+    depends_on:
+      - inventory-svc
+      - crm-svc
+      - sales-svc
+    networks:
+      - shama-net
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:5000/health"]
+      interval: 10s
+
+volumes:
+  pg_data:
+  redis_data:
+  minio_data:
+  grafana_data:

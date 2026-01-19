@@ -276,21 +276,21 @@ k6 run tests/load/k6-script.js
 ### 6.1 Docker Compose Tests
 ```bash
 # Test de health checks
-docker-compose up -d
+docker compose up -d
 sleep 30
-docker-compose ps | grep -q "Up" || exit 1
+docker compose ps | grep -q "Up" || exit 1
 
 # Test de conectividad
-docker-compose exec gateway curl -f http://inventory-svc:5001/health
+docker compose exec gateway curl -f http://inventory-svc:5001/health
 ```
 
 ### 6.2 Database Migrations Test
 ```bash
 # Test migrations
-docker-compose run --rm sales-svc npm run migration:run
+docker compose run --rm sales-svc npm run migration:run
 
 # Verify schema
-docker-compose exec postgres psql -U shama_user -d shama_platform -c "\dt sales.*"
+docker compose exec postgres psql -U shama_user -d shama_platform -c "\dt sales.*"
 ```
 
 ---

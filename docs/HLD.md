@@ -906,7 +906,7 @@ echo "🚀 Shama Core Deployment Script v1.0"
 # 1. Pre-flight checks
 echo "[1/6] Pre-flight checks..."
 command -v docker >/dev/null 2>&1 || { echo "Docker required"; exit 1; }
-command -v docker-compose >/dev/null 2>&1 || { echo "Docker Compose required"; exit 1; }
+command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1 || { echo "Docker Compose v2 required"; exit 1; }
 
 # 2. Secrets validation
 echo "[2/6] Validating secrets..."
@@ -919,23 +919,23 @@ done
 
 # 3. Build images
 echo "[3/6] Building service images..."
-docker-compose build --parallel
+docker compose build --parallel
 
 # 4. Database migration (zero-downtime)
 echo "[4/6] Running database migrations..."
-docker-compose run --rm sales-svc npm run migration:run
+docker compose run --rm sales-svc npm run migration:run
 
 # 5. Deploy with rolling restart
 echo "[5/6] Deploying services..."
-docker-compose up -d --remove-orphans
+docker compose up -d --remove-orphans
 
 # 6. Health check
 echo "[6/6] Running health checks..."
 sleep 10
 for service in gateway inventory-svc crm-svc sales-svc; do
-  if ! docker-compose ps $service | grep -q "Up"; then
+  if ! docker compose ps $service | grep -q "Up"; then
     echo "❌ Service $service failed to start"
-    docker-compose logs $service
+    docker compose logs $service
     exit 1
   fi
 done
@@ -967,10 +967,10 @@ disaster_scenarios:
     rto: "< 1 hour"
     rpo: "< 24 hours"
     steps:
-      - "Stop all services: docker-compose stop"
+      - "Stop all services: docker compose stop"
       - "Restore latest backup"
       - "Replay WAL logs if available"
-      - "Restart services: docker-compose up -d"
+      - "Restart services: docker compose up -d"
       
   - scenario: "Complete server failure"
     rto: "< 4 hours"

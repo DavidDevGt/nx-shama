@@ -2,14 +2,43 @@
 
 **Versión:** 1.0.0
 **Base URL:** `http://localhost:5000` (Desarrollo) / `https://api.shama.com` (Producción)
-**Nota:** Sistema para uso exclusivo del administrador. No requiere autenticación.
+**Nota:** Sistema protegido con JWT. Requiere autenticación para la mayoría de endpoints.
 
 ---
+---
+
+## 1. Autenticación
+
+### Login
+- **Endpoint:** `POST /auth/login`
+- **Descripción:** Obtener token JWT para acceder a la API
+- **Body:**
+  ```json
+  {
+    "email": "admin@test.com",
+    "password": "any"
+  }
+  ```
+- **Respuesta:**
+  ```json
+  {
+    "access_token": "jwt_token_here",
+    "user": {
+      "id": "user-1",
+      "email": "admin@test.com",
+      "roles": ["ADMIN"]
+    }
+  }
+  ```
+
+### Uso del Token
+Incluir el token en el header `Authorization: Bearer <token>` para todos los requests protegidos.
+
+**Roles disponibles:** ADMIN, SALES, READONLY
 
 ---
 
 ## 2. Inventory Service (Port: 5001)
-
 ### 2.1 Productos
 
 #### Listar Productos

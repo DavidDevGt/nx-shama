@@ -16,8 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@nx-shama/contracts": ["libs/contracts/src/index.ts"]
-    },
-    "ignoreDeprecations": "6.0"
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

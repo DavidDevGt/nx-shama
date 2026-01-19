@@ -149,10 +149,10 @@ echo "$NEW_DB_PASS" > secrets/db_password.txt
 echo "$NEW_JWT_SECRET" > secrets/jwt_secret.txt
 
 # Reiniciar servicios
-docker-compose restart postgres sales-svc gateway
+docker compose restart postgres sales-svc gateway
 
 # Limpiar logs antiguos
-docker-compose logs --tail=0 > /dev/null
+docker compose logs --tail=0 > /dev/null
 ```
 
 ---

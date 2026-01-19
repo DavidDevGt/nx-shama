@@ -1,96 +1,385 @@
-# NxShama
+# 🚀 Shama Core Platform
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+**Plataforma Enterprise-Grade de Gestión de Ventas para Ferretería Shama**
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+> **Versión 2.0.0** - Production Ready | Microservicios | CQRS | Event-Driven | Observabilidad 360°
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+Una plataforma completa de microservicios construida con las mejores prácticas enterprise: NestJS, PostgreSQL, NATS JetStream, OpenTelemetry, Docker y observabilidad completa.
 
-## Run tasks
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://docker.com)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://postgresql.org)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-To run tasks with Nx use:
+## 🏗️ Arquitectura Enterprise
 
-```sh
-npx nx <target> <project-name>
+### Microservicios (4 servicios principales)
+| Servicio | Puerto | Tecnología | Responsabilidad |
+|----------|--------|------------|----------------|
+| **Gateway** | 5000 | NestJS + Fastify | API Gateway, Auth, Rate Limiting, Health Checks |
+| **Inventory** | 5001 | NestJS + CQRS | Gestión de Productos, Stock |
+| **CRM** | 5002 | NestJS | Gestión de Clientes |
+| **Sales** | 5003 | NestJS + CQRS | Gestión de Cotizaciones, PDFs |
+
+### Infraestructura Completa (11 servicios)
+- **PostgreSQL + PgBouncer**: Base de datos con connection pooling
+- **Redis**: Cache distribuido de alto rendimiento
+- **MinIO (5004/5005)**: Object storage para PDFs y archivos
+- **NATS JetStream**: Message broker con persistencia
+- **Loki (5006)**: Agregación de logs centralizada
+- **Grafana (5007)**: Dashboards y métricas en tiempo real
+- **Jaeger (5008)**: Trazas distribuidas para debugging
+
+## ✨ Características Enterprise
+
+### 🔐 Seguridad & Autenticación
+- **JWT Authentication** con roles granulares (ADMIN, SALES, READONLY)
+- **Guards & Decorators** para autorización por endpoint
+- **Rate Limiting** configurable por IP
+- **Secrets Management** con Docker secrets
+- **Input Validation** global automática
+
+### 📊 Observabilidad 360°
+- **OpenTelemetry**: Trazas distribuidas automáticas
+- **Health Checks**: Monitoreo de memoria, disco y servicios
+- **Logging Estructurado**: JSON logs con Loki
+- **Métricas Custom**: Performance y business metrics
+- **Dashboards Grafana**: Visualización en tiempo real
+
+### ⚡ Performance & Escalabilidad
+- **CQRS Pattern**: Separación óptima de lectura/escritura
+- **Event-Driven**: Comunicación asíncrona entre servicios
+- **Caching Avanzado**: Redis con TTL y invalidación
+- **Connection Pooling**: PgBouncer para DB
+- **Circuit Breakers**: Resiliencia en fallos
+
+### 🛠️ Desarrollo & DevOps
+- **Docker Ready**: Despliegue con un comando
+- **Hot Reload**: Desarrollo con recarga automática
+- **Migrations**: Database versioning con TypeORM
+- **Testing**: Jest configurado para unit/integration/E2E
+- **CI/CD**: Pipeline preparado para GitHub Actions
+
+## 🚀 Inicio Rápido
+
+### Prerrequisitos Mínimos
+- **CPU:** 2 vCPU (4 recomendado)
+- **RAM:** 4 GB (8 GB recomendado)
+- **Disco:** 50 GB SSD
+- **OS:** Ubuntu 22.04+ / Docker compatible
+
+### Despliegue Automatizado
+```bash
+# Clonar y desplegar (3 minutos)
+git clone <repository-url> shama-core
+cd shama-core
+./deploy.sh
 ```
 
-For example:
+### Verificar Despliegue
+```bash
+# Todos los servicios corriendo
+docker compose ps
 
-```sh
-npx nx build myproject
+# Health check global
+curl http://localhost:5000/health
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+## 🌐 Acceso a Interfaces
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+| Servicio | URL | Credenciales | Descripción |
+|----------|-----|--------------|-------------|
+| **API Gateway** | http://localhost:5000 | JWT Token | API REST principal |
+| **Grafana** | http://localhost:5007 | admin/admin | Dashboards & Métricas |
+| **MinIO Console** | http://localhost:5005 | minioadmin/minioadmin123 | Storage Web UI |
+| **Loki** | http://localhost:5006 | - | Logs Centralizados |
+| **Jaeger** | http://localhost:5008 | - | Trazas Distribuidas |
 
-## Add new projects
+## 📋 Puertos Utilizados (5000-5099)
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+| Servicio | Puerto | Descripción |
+|----------|--------|-------------|
+| Gateway | 5000 | API Gateway principal |
+| Inventory | 5001 | Gestión de productos |
+| CRM | 5002 | Gestión de clientes |
+| Sales | 5003 | Gestión de cotizaciones |
+| MinIO API | 5004 | Object storage API |
+| MinIO Console | 5005 | Interfaz web MinIO |
+| Loki | 5006 | Log aggregation |
+| Grafana | 5007 | Dashboards y métricas |
+| Jaeger | 5008 | Trazas distribuidas |
 
-To install a new plugin you can use the `nx add` command. Here's an example of adding the React plugin:
-```sh
-npx nx add @nx/react
+## 🔐 Autenticación
+
+```bash
+# Login para obtener token JWT
+curl -X POST http://localhost:5000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@test.com", "password": "any"}'
+
+# Respuesta esperada:
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "user-1",
+    "email": "admin@test.com",
+    "roles": ["ADMIN"]
+  }
+}
+
+# Usar token en requests
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:5000/api/v1/products
 ```
 
-Use the plugin's generator to create new projects. For example, to create a new React app or library:
+## 📋 Flujo de Uso Completo
 
-```sh
-# Generate an app
-npx nx g @nx/react:app demo
-
-# Generate a library
-npx nx g @nx/react:lib some-lib
+### 1. Configuración Inicial
+```bash
+# Crear producto
+curl -X POST http://localhost:5000/api/v1/products \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sku": "HAM001",
+    "name": "Martillo Industrial",
+    "price": 25.50,
+    "initialStock": 100
+  }'
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
-
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Set up CI!
-
-### Step 1
-
-To connect to Nx Cloud, run the following command:
-
-```sh
-npx nx connect
+### 2. Gestión de Clientes
+```bash
+# Crear cliente
+curl -X POST http://localhost:5000/api/v1/customers \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Ferretería Ejemplo S.A.",
+    "nit": "123456789",
+    "address": "Calle Principal 123",
+    "email": "contacto@ejemplo.com"
+  }'
 ```
 
-Connecting to Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
+### 3. Ciclo de Cotización Completo
+```bash
+# Crear cotización (precios obtenidos automáticamente de Inventory)
+curl -X POST http://localhost:5000/api/v1/quotations \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customerId": "CUSTOMER_UUID",
+    "items": [
+      {
+        "productId": "PRODUCT_UUID",
+        "quantity": 5
+      }
+    ]
+  }'
 
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# Listar cotizaciones
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  http://localhost:5000/api/v1/quotations
 
-### Step 2
+# Aprobar cotización (reduce stock automáticamente vía eventos)
+curl -X POST http://localhost:5000/api/v1/quotations/QUOTATION_UUID/approve \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
+# Generar PDF profesional con branding
+curl http://localhost:5000/api/v1/quotations/QUOTATION_UUID/pdf \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  --output cotizacion.pdf
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 📚 Documentación
 
-## Install Nx Console
+- **[📋 DEPLOYMENT.md](DEPLOYMENT.md)** - Guía completa de despliegue en producción
+- **[🔌 API Reference](docs/API.md)** - Endpoints y especificaciones completas
+- **[🏗️ High-Level Design](docs/HLD.md)** - Arquitectura detallada
+- **[🔒 Security Guide](docs/SECURITY.md)** - Políticas de seguridad
+- **[🧪 Testing Strategy](docs/TESTING.md)** - Estrategia de testing
+- **[🔧 Troubleshooting](docs/TROUBLESHOOTING.md)** - Resolución de problemas
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+## 🛠️ Desarrollo Local
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Configuración del Entorno
+```bash
+# Instalar dependencias
+pnpm install
 
-## Useful links
+# Configurar secrets
+mkdir -p secrets
+echo "secure_password" > secrets/db_password.txt
+echo "jwt_secret_key" > secrets/jwt_secret.txt
 
-Learn more:
+# Levantar servicios
+docker compose up -d
 
-- [Learn more about this workspace setup](https://nx.dev/getting-started/intro#learn-nx?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# Verificar health
+curl http://localhost:5000/health
+```
 
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Desarrollo Individual
+```bash
+# Servicio específico
+npx nx serve gateway
+npx nx serve sales-svc
+
+# Construir
+npx nx build gateway
+
+# Testing
+pnpm test
+pnpm test:e2e
+```
+
+### Debugging
+```bash
+# Logs en tiempo real
+docker compose logs -f gateway
+
+# Acceder a contenedor
+docker compose exec gateway sh
+
+# Ver métricas
+curl http://localhost:5000/health
+```
+
+## 📊 Monitoreo & Observabilidad
+
+### Dashboards Grafana
+- **URL:** http://localhost:5007 (admin/admin)
+- **Health Checks** de todos los servicios
+- **Performance Metrics** de APIs
+- **Business Metrics** (cotizaciones, productos)
+- **System Resources** (CPU, memoria, disco)
+
+### Logs Centralizados (Loki)
+- **URL:** http://localhost:5006
+- Búsqueda por servicio, nivel y tiempo
+- Filtros avanzados
+- Integración con Grafana
+
+### Trazas Distribuidas (Jaeger)
+- **URL:** http://localhost:5008
+- Visualización de requests entre microservicios
+- Debugging de latencia y errores
+- Performance bottlenecks
+
+## 🔧 Administración
+
+### Gestión de Servicios
+```bash
+# Estado de servicios
+docker compose ps
+
+# Reiniciar servicio
+docker compose restart gateway
+
+# Ver logs
+docker compose logs -f sales-svc
+
+# Backup
+docker compose exec postgres pg_dump -U shama_user shama_platform > backup.sql
+```
+
+### Troubleshooting Común
+```bash
+# Servicios no inician
+docker compose logs <service-name>
+
+# Problemas de conectividad
+docker compose exec gateway ping inventory-svc
+
+# Alto uso de recursos
+docker stats
+
+# Limpiar cache Redis
+docker compose exec redis redis-cli FLUSHALL
+```
+
+## 🚀 Despliegue en Producción
+
+### Servidor Recomendado
+- **CPU:** 2-4 vCPU (Intel i5+)
+- **RAM:** 4-8 GB
+- **Disco:** 50-100 GB SSD
+- **OS:** Ubuntu 22.04 LTS
+
+### Deployment Automatizado
+```bash
+# En servidor de producción
+git clone <repository-url> shama-core
+cd shama-core
+
+# Configurar secrets
+echo "tu_password_seguro_db" > secrets/db_password.txt
+echo "tu_jwt_secret_muy_seguro" > secrets/jwt_secret.txt
+
+# Desplegar
+./deploy.sh
+```
+
+### Post-Deployment
+1. ✅ Verificar health checks
+2. ✅ Configurar dominio (opcional)
+3. ✅ Configurar SSL con Let's Encrypt
+4. ✅ Configurar backups automáticos
+5. ✅ Configurar monitoring alerts
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
+
+### Estándares de Código
+- **ESLint** configurado
+- **Prettier** para formato
+- **Jest** para testing
+- **TypeScript** estricto
+- **Conventional Commits**
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
+
+## 📞 Soporte
+
+- **📧 Email:** soporte@shama.com
+- **📚 Docs:** Ver carpeta `docs/`
+- **🐛 Issues:** GitHub Issues
+- **💬 Discord:** [Shama Community](https://discord.gg/shama)
+
+---
+
+## 🎯 Roadmap
+
+### ✅ Versión 2.0.0 (Actual)
+- [x] Arquitectura de microservicios completa
+- [x] CQRS pattern implementado
+- [x] Autenticación JWT con roles
+- [x] Observabilidad 360° (OpenTelemetry, Loki, Grafana)
+- [x] Health checks avanzados
+- [x] Caching con Redis
+- [x] Object storage con MinIO
+- [x] PDF generation profesional
+- [x] Docker production-ready
+
+### 🔄 Próximas Versiones
+- [ ] Multi-tenancy support
+- [ ] API Gateway avanzado (Kong)
+- [ ] Service mesh (Istio)
+- [ ] Auto-scaling con Kubernetes
+- [ ] Mobile app companion
+- [ ] Advanced analytics
+- [ ] Machine learning para predicciones
+
+---
+
+**Ferretería Shama** - Sistema de gestión empresarial moderno, escalable y enterprise-grade. 🚀⚡
+
+*Construido con ❤️ para la excelencia empresarial*

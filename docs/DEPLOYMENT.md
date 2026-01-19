@@ -21,13 +21,11 @@
 
 ### 1.3 Puertos Requeridos
 - 80/443: Nginx (HTTP/HTTPS)
-- 4222: NATS
-- 5000-5003: Servicios
-- 5432: PostgreSQL
-- 6379: Redis
-- 9000/9001: MinIO
-- 3100: Loki
-- 3000: Grafana
+- 4222: NATS (interno)
+- 5000-5007: Servicios y herramientas
+- 5432: PostgreSQL (interno)
+- 6432: PgBouncer (interno)
+- 6379: Redis (interno)
 
 ---
 
@@ -62,18 +60,18 @@ JWT_SECRET=your_jwt_secret
 
 ### 3.1 Docker Compose Simple (PDR)
 ```bash
-docker-compose -f docker-compose.dev.yml up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
 ### 3.2 Verificar Servicios
 ```bash
-docker-compose ps
+docker compose ps
 curl http://localhost:5000/health
 ```
 
 ### 3.3 Logs
 ```bash
-docker-compose logs -f gateway
+docker compose logs -f gateway
 ```
 
 ---
@@ -117,8 +115,8 @@ curl -f http://localhost:5002/health
 curl -f http://localhost:5003/health
 
 # Acceder a interfaces
-# Grafana: http://your-server:3000 (admin/admin)
-# MinIO Console: http://your-server:9001
+# Grafana: http://your-server:5007 (admin/admin)
+# MinIO Console: http://your-server:5005
 ```
 
 ---
@@ -190,19 +188,19 @@ nats:
 ### 7.1 Servicio No Inicia
 ```bash
 # Ver logs
-docker-compose logs <service-name>
+docker compose logs <service-name>
 
 # Verificar dependencias
-docker-compose ps
+docker compose ps
 ```
 
 ### 7.2 Problemas de Conexión DB
 ```bash
 # Verificar PgBouncer
-docker-compose exec pgbouncer pg_isready -h localhost -p 6432
+docker compose exec pgbouncer pg_isready -h localhost -p 6432
 
 # Resetear conexión
-docker-compose restart pgbouncer
+docker compose restart pgbouncer
 ```
 
 ### 7.3 Alto Uso de Memoria
@@ -225,14 +223,14 @@ deploy:
 ```bash
 # Tag específico
 git checkout v1.0.0
-docker-compose build --no-cache
-docker-compose up -d
+docker compose build --no-cache
+docker compose up -d
 ```
 
 ### 8.2 Database Rollback
 ```bash
 # Restaurar backup
-docker-compose exec postgres pg_restore -U shama_user -d shama_platform /backups/backup.sql.gz
+docker compose exec postgres pg_restore -U shama_user -d shama_platform /backups/backup.sql.gz
 ```
 
 ---

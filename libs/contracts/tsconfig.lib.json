@@ -11,8 +11,7 @@
     "noImplicitAny": true,
     "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "ignoreDeprecations": "6.0"
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src/**/*.ts"],
   "exclude": [
