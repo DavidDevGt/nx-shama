@@ -38,13 +38,13 @@ services:
 
   # --- PgBouncer ---
   pgbouncer:
-    image: edoburu/pgbouncer:1.21.0
+    image: brainsam/pgbouncer:latest
     container_name: shama-pgbouncer
     environment:
-      DATABASE_URL: postgres://shama_user:secure_password@postgres:5432/shama_platform
-      POOL_MODE: session
-      MAX_CLIENT_CONN: 1000
-      DEFAULT_POOL_SIZE: 25
+      PGBOUNCER_DATABASE_URL: postgres://shama_user:secure_password@postgres:5432/shama_platform
+      PGBOUNCER_POOL_MODE: session
+      PGBOUNCER_MAX_CLIENT_CONN: 1000
+      PGBOUNCER_DEFAULT_POOL_SIZE: 25
     depends_on:
       postgres:
         condition: service_healthy
