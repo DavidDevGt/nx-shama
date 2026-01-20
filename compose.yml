@@ -133,7 +133,9 @@ services:
 
   # --- Microservicios ---
   inventory-svc:
-    build: ./apps/inventory-svc
+    build:
+      context: .
+      dockerfile: ./apps/inventory-svc/Dockerfile
     container_name: shama-inventory
     ports:
       - "5001:5001"
@@ -156,7 +158,9 @@ services:
       interval: 10s
 
   crm-svc:
-    build: ./apps/crm-svc
+    build:
+      context: .
+      dockerfile: ./apps/crm-svc/Dockerfile
     container_name: shama-crm
     ports:
       - "5002:5002"
@@ -175,7 +179,9 @@ services:
       interval: 10s
 
   sales-svc:
-    build: ./apps/sales-svc
+    build:
+      context: .
+      dockerfile: ./apps/sales-svc/Dockerfile
     container_name: shama-sales
     ports:
       - "5003:5003"
@@ -200,7 +206,9 @@ services:
       interval: 10s
 
   gateway:
-    build: ./apps/gateway
+    build:
+      context: .
+      dockerfile: ./apps/gateway/Dockerfile
     container_name: shama-gateway
     ports:
       - "5000:5000"
