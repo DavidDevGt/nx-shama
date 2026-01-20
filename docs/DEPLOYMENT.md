@@ -33,7 +33,7 @@
 
 ### 2.1 Clonar Repositorio
 ```bash
-git clone https://github.com/your-org/shama-core.git
+git clone https://github.com/DavidDevGt/nx-shama shama-core
 cd shama-core
 ```
 

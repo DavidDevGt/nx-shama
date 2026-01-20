@@ -6,8 +6,12 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
+import sdk from './tracing';
 
 async function bootstrap() {
+  // Initialize OpenTelemetry
+  await sdk.start();
+
   const app = await NestFactory.create(AppModule);
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);

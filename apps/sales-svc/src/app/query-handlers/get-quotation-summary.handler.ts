@@ -36,7 +36,30 @@ export class GetQuotationSummaryHandler implements IQueryHandler<GetQuotationSum
       qb.offset(query.offset);
     }
 
-    // TODO: Apply filters
+    // Apply filters
+    if (query.filters.status) {
+      qb.andWhere('q.status = :status', { status: query.filters.status });
+    }
+
+    if (query.filters.customerName) {
+      qb.andWhere('c.name ILIKE :customerName', { customerName: `%${query.filters.customerName}%` });
+    }
+
+    if (query.filters.minAmount) {
+      qb.andWhere('q.total_amount >= :minAmount', { minAmount: query.filters.minAmount });
+    }
+
+    if (query.filters.maxAmount) {
+      qb.andWhere('q.total_amount <= :maxAmount', { maxAmount: query.filters.maxAmount });
+    }
+
+    if (query.filters.dateFrom) {
+      qb.andWhere('q.created_at >= :dateFrom', { dateFrom: query.filters.dateFrom });
+    }
+
+    if (query.filters.dateTo) {
+      qb.andWhere('q.created_at <= :dateTo', { dateTo: query.filters.dateTo });
+    }
 
     const results = await qb.getRawMany();
 

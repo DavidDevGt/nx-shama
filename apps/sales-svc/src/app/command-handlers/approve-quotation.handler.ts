@@ -6,6 +6,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { ApproveQuotationCommand } from '../commands/approve-quotation.command';
 import { Quotation } from '../quotation.entity';
 import { QuotationStatus, QuotationApprovedEvent, QuotationApprovedLineItem } from '@nx-shama/contracts';
+import { InventoryClient } from '../inventory.client';
 
 @CommandHandler(ApproveQuotationCommand)
 export class ApproveQuotationHandler implements ICommandHandler<ApproveQuotationCommand> {
@@ -14,6 +15,7 @@ export class ApproveQuotationHandler implements ICommandHandler<ApproveQuotation
     private readonly quotationRepository: Repository<Quotation>,
     @Inject('NATS_CLIENT') private natsClient: ClientProxy,
     private readonly publisher: EventPublisher,
+    private readonly inventoryClient: InventoryClient,
   ) {}
 
   async execute(command: ApproveQuotationCommand): Promise<void> {
@@ -28,8 +30,13 @@ export class ApproveQuotationHandler implements ICommandHandler<ApproveQuotation
       throw new Error('Quotation not found');
     }
 
-    // Use domain method
-    quotation.approve();
+    // Get current prices from inventory
+    const productIds = quotation.items.map(item => item.productId);
+    const products = await this.inventoryClient.getProducts(productIds);
+    const currentPrices = new Map(products.map(p => [p.id, p.price]));
+
+    // Use domain method with current prices
+    quotation.approve(currentPrices);
 
     // Load line items from items if not set
     if (!quotation.lineItems) {

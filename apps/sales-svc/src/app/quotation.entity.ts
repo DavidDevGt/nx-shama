@@ -49,13 +49,13 @@ export class Quotation {
   items: QuotationItem[];
 
   // Domain methods
-  approve(): void {
+  approve(currentPrices: Map<string, number>): void {
     if (this.status !== QuotationStatus.PENDING) {
       throw new Error('Solo cotizaciones PENDING pueden aprobarse');
     }
 
     this.status = QuotationStatus.SOLD;
-    this.lineItems = this.freezePrices();
+    this.lineItems = this.freezePrices(currentPrices);
     this.updatedAt = new Date();
 
     // Event sourcing lite
@@ -66,10 +66,11 @@ export class Quotation {
     });
   }
 
-  private freezePrices(): LineItem[] {
-    // This would be called with current prices from inventory
+  freezePrices(currentPrices: Map<string, number>): LineItem[] {
+    // Freeze current prices into immutable snapshots
     return this.lineItems?.map(item => ({
       ...item,
+      unitPrice: currentPrices.get(item.productId) || item.unitPrice, // Use current price
       priceSnapshot: true
     })) || [];
   }

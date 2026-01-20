@@ -8,7 +8,7 @@ const jaegerExporter = new JaegerExporter({
 });
 
 const sdk = new NodeSDK({
-  serviceName: 'shama-gateway',
+  serviceName: 'shama-inventory',
   spanProcessor: new BatchSpanProcessor(jaegerExporter),
   instrumentations: [
     new HttpInstrumentation(),

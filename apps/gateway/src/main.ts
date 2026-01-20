@@ -10,11 +10,11 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { AppModule } from './app/app.module';
-import { initializeTracing } from './tracing';
+import sdk from './tracing';
 
 async function bootstrap() {
   // Initialize OpenTelemetry tracing
-  initializeTracing();
+  await sdk.start();
 
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,

@@ -71,7 +71,7 @@ Una plataforma completa de microservicios construida con las mejores prácticas 
 ### Despliegue Automatizado
 ```bash
 # Clonar y desplegar (3 minutos)
-git clone <repository-url> shama-core
+git clone https://github.com/DavidDevGt/nx-shama shama-core
 cd shama-core
 ./deploy.sh
 ```
@@ -200,6 +200,47 @@ curl http://localhost:5000/api/v1/quotations/QUOTATION_UUID/pdf \
 - **[🔒 Security Guide](docs/SECURITY.md)** - Políticas de seguridad
 - **[🧪 Testing Strategy](docs/TESTING.md)** - Estrategia de testing
 - **[🔧 Troubleshooting](docs/TROUBLESHOOTING.md)** - Resolución de problemas
+- **[📮 Postman Collection](POSTMAN_README.md)** - Pruebas de integración completas
+
+## 🧪 Testing de Integración
+
+### Colección Postman Completa
+
+La plataforma incluye una colección completa de Postman para pruebas de integración end-to-end:
+
+```bash
+# Instalar Newman (Postman CLI)
+npm install -g newman newman-reporter-htmlextra
+
+# Ejecutar pruebas de integración automatizadas
+./run-integration-tests.sh
+
+# Reportes HTML generados en test-reports/
+```
+
+### Cobertura de Pruebas
+
+- ✅ **Health Checks** - Verificación de todos los servicios
+- ✅ **Authentication** - JWT tokens y roles
+- ✅ **Products API** - CRUD completo + gestión de stock
+- ✅ **Customers API** - Gestión de clientes
+- ✅ **Quotations API** - Ciclo completo de cotizaciones + PDFs
+- ✅ **Error Scenarios** - Validación de errores y edge cases
+- ✅ **Load Testing** - Escenarios de carga con datos aleatorios
+
+### Variables Automáticas
+
+La colección configura automáticamente:
+- `jwt_token` - Token de autenticación
+- `customer_id` - ID de cliente creado
+- `product_id` - ID de producto creado
+- `quotation_id` - ID de cotización creada
+
+### Testing Manual
+
+1. Importar `Shama-Core-Platform.postman_collection.json`
+2. Configurar variables de entorno
+3. Ejecutar carpetas en orden: Health → Products → Customers → Quotations
 
 ## 🛠️ Desarrollo Local
 
@@ -229,9 +270,14 @@ npx nx serve sales-svc
 # Construir
 npx nx build gateway
 
-# Testing
+# Testing unitario
 pnpm test
-pnpm test:e2e
+
+# Testing de integración con Postman
+./run-integration-tests.sh
+
+# Testing manual con Postman
+# Importar: Shama-Core-Platform.postman_collection.json
 ```
 
 ### Debugging
@@ -310,7 +356,7 @@ docker compose exec redis redis-cli FLUSHALL
 ### Deployment Automatizado
 ```bash
 # En servidor de producción
-git clone <repository-url> shama-core
+git clone https://github.com/DavidDevGt/nx-shama shama-core
 cd shama-core
 
 # Configurar secrets

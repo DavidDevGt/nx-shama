@@ -5,6 +5,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductEntity } from './product.entity';
+import { ProcessedEvent } from './processed-event.entity';
 import { ProductsController } from './infrastructure/controllers/products.controller';
 import { ProductRepositoryAdapter } from './infrastructure/repositories/product-repository.adapter';
 import { CreateProductHandler } from './application/handlers/create-product.handler';
@@ -22,10 +23,10 @@ import { QuotationApprovedHandler } from './quotation-approved.handler';
       password: process.env.DB_PASSWORD,
       database: 'shama_platform',
       schema: 'inventory',
-      entities: [ProductEntity],
+      entities: [ProductEntity, ProcessedEvent],
       synchronize: true, // For development
     }),
-    TypeOrmModule.forFeature([ProductEntity]),
+    TypeOrmModule.forFeature([ProductEntity, ProcessedEvent]),
     CqrsModule,
     ClientsModule.register([
       {
