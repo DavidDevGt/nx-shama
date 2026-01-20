@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TerminusModule } from '@nestjs/terminus';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,6 +13,7 @@ import { CreateProductHandler } from './application/handlers/create-product.hand
 import { UpdateStockHandler } from './application/handlers/update-stock.handler';
 import { GetProductsHandler } from './application/handlers/get-products.handler';
 import { QuotationApprovedHandler } from './quotation-approved.handler';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -28,6 +30,7 @@ import { QuotationApprovedHandler } from './quotation-approved.handler';
     }),
     TypeOrmModule.forFeature([ProductEntity, ProcessedEvent]),
     CqrsModule,
+    TerminusModule,
     ClientsModule.register([
       {
         name: 'NATS_CLIENT',
@@ -38,7 +41,7 @@ import { QuotationApprovedHandler } from './quotation-approved.handler';
       },
     ]),
   ],
-  controllers: [AppController, ProductsController],
+  controllers: [AppController, ProductsController, HealthController],
   providers: [
     AppService,
     {

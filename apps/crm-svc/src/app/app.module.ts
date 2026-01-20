@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TerminusModule } from '@nestjs/terminus';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CustomerEntity } from './customer.entity';
@@ -8,6 +9,7 @@ import { CustomersController } from './infrastructure/controllers/customers.cont
 import { CustomerRepositoryAdapter } from './infrastructure/repositories/customer-repository.adapter';
 import { CreateCustomerHandler } from './application/handlers/create-customer.handler';
 import { GetCustomersHandler } from './application/handlers/get-customers.handler';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -24,8 +26,9 @@ import { GetCustomersHandler } from './application/handlers/get-customers.handle
     }),
     TypeOrmModule.forFeature([CustomerEntity]),
     CqrsModule,
+    TerminusModule,
   ],
-  controllers: [AppController, CustomersController],
+  controllers: [AppController, CustomersController, HealthController],
   providers: [
     AppService,
     {

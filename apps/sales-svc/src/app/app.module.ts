@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CqrsModule } from '@nestjs/cqrs';
+import { TerminusModule } from '@nestjs/terminus';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,6 +14,7 @@ import { InventoryClient } from './inventory.client';
 import { CreateQuotationHandler } from './command-handlers/create-quotation.handler';
 import { ApproveQuotationHandler } from './command-handlers/approve-quotation.handler';
 import { GetQuotationSummaryHandler } from './query-handlers/get-quotation-summary.handler';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { GetQuotationSummaryHandler } from './query-handlers/get-quotation-summa
     }),
     TypeOrmModule.forFeature([Quotation, QuotationItem]),
     CqrsModule,
+    TerminusModule,
     ClientsModule.register([
       {
         name: 'NATS_CLIENT',
@@ -41,7 +44,7 @@ import { GetQuotationSummaryHandler } from './query-handlers/get-quotation-summa
       },
     ]),
   ],
-  controllers: [AppController, QuotationsController],
+  controllers: [AppController, QuotationsController, HealthController],
   providers: [
     AppService,
     QuotationsService,
