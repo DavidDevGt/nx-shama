@@ -3,14 +3,15 @@ import { EventPattern, Payload, Ctx } from '@nestjs/microservices';
 import { NatsContext } from '@nestjs/microservices';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CommandBus } from '@nestjs/cqrs';
 import { QuotationApprovedEvent } from '@nx-shama/contracts';
-import { ProductsService } from './products.service';
+import { UpdateStockCommand } from './application/commands/update-stock.command';
 import { ProcessedEvent } from './processed-event.entity';
 
 @Controller()
 export class QuotationApprovedHandler {
   constructor(
-    private readonly productsService: ProductsService,
+    private readonly commandBus: CommandBus,
     @InjectRepository(ProcessedEvent)
     private readonly processedEventRepository: Repository<ProcessedEvent>,
   ) {}
@@ -33,10 +34,7 @@ export class QuotationApprovedHandler {
     try {
       // Reduce stock for each line item
       for (const item of event.lineItems) {
-        await this.productsService.updateStock(item.productId, {
-          adjustment: -item.quantity,
-          reason: 'Sale',
-        });
+        await this.commandBus.execute(new UpdateStockCommand(item.productId, -item.quantity));
       }
 
       // Mark as processed
